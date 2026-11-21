@@ -1,122 +1,427 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import { useEffect, useState } from "react";
+import "./App.css";
+import Sidebar from "./components/sidebar";
+import StatsCard from "./components/StatsCard";
+
+const STORAGE_KEY = "main-gate-tracker-visitors";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [visitors, setVisitors] = useState(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const [activePage, setActivePage] = useState("Dashboard");
+  const [search, setSearch] = useState("");
+  const [showForm, setShowForm] = useState(false);
+
+  const [formData, setFormData] = useState({
+    name: "",
+    phone: "",
+    purpose: "",
+    personToMeet: "",
+    organization: "",
+  });
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(visitors));
+  }, [visitors]);
+
+  const today = new Date().toLocaleDateString("en-CA");
+
+  const totalVisitorsToday = visitors.filter(
+    (visitor) => visitor.entryDate === today
+  ).length;
+
+  const currentlyInside = visitors.filter(
+    (visitor) => visitor.status === "Inside"
+  ).length;
+
+  const exitedVisitors = visitors.filter(
+    (visitor) => visitor.status === "Exited"
+  ).length;
+
+  const filteredVisitors = visitors.filter((visitor) => {
+    const searchText = search.toLowerCase();
+
+    return (
+      visitor.name.toLowerCase().includes(searchText) ||
+      visitor.phone.includes(searchText) ||
+      visitor.purpose.toLowerCase().includes(searchText) ||
+      visitor.personToMeet.toLowerCase().includes(searchText)
+    );
+  });
+
+  function handleInputChange(e) {
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  }
+
+  function handleAddVisitor(e) {
+    e.preventDefault();
+
+    const now = new Date();
+
+    const newVisitor = {
+      id: crypto.randomUUID(),
+      ...formData,
+      entryDate: now.toLocaleDateString("en-CA"),
+      entryTime: now.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      exitTime: "",
+      status: "Inside",
+    };
+
+    setVisitors((prev) => [newVisitor, ...prev]);
+
+    setFormData({
+      name: "",
+      phone: "",
+      purpose: "",
+      personToMeet: "",
+      organization: "",
+    });
+
+    setShowForm(false);
+  }
+
+  function handleExit(visitorId) {
+    const now = new Date();
+
+    setVisitors((prev) =>
+      prev.map((visitor) =>
+        visitor.id === visitorId
+          ? {
+              ...visitor,
+              status: "Exited",
+              exitTime: now.toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              }),
+            }
+          : visitor
+      )
+    );
+  }
+
+  function handleDelete(visitorId) {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this visitor record?"
+    );
+
+    if (!confirmed) return;
+
+    setVisitors((prev) => prev.filter((visitor) => visitor.id !== visitorId));
+  }
+
+  const navItems = [
+    "Dashboard",
+    "Visitor Records",
+    "Currently Inside",
+    "History",
+  ];
+
+  const pageVisitors =
+    activePage === "Currently Inside"
+      ? filteredVisitors.filter((visitor) => visitor.status === "Inside")
+      : activePage === "History"
+        ? filteredVisitors.filter((visitor) => visitor.status === "Exited")
+        : filteredVisitors;
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div className="app">
+      {/* Sidebar */}
+      <Sidebar
+  navItems={navItems}
+  activePage={activePage}
+  setActivePage={setActivePage}
+/>
+      {/* Main Content */}
+      <main className="main-content">
+        <header className="topbar">
+          <div>
+            <h1>{activePage}</h1>
+            <p>Manage and monitor gate visitor activity.</p>
+          </div>
 
-      <div className="ticks"></div>
+          <div className="profile">
+            <div className="avatar">A</div>
+            <div>
+              <strong>Gate Administrator</strong>
+              <small>Administrator</small>
+            </div>
+          </div>
+        </header>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+        {/* Dashboard */}
+        {activePage === "Dashboard" && (
+          <>
+            <section className="welcome">
+              <div>
+                <h2>Welcome to GateTrack</h2>
+                <p>
+                  Monitor visitor entries and exits from one central
+                  dashboard.
+                </p>
+              </div>
+              <div className="welcome-icon">⌂</div>
+            </section>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+            <section className="stats">
+  <StatsCard
+    title="Total Visitors Today"
+    value={totalVisitorsToday}
+    icon="♙"
+    color="blue"
+    subtitle="Today's registered entries"
+  />
+
+  <StatsCard
+    title="Currently Inside"
+    value={currentlyInside}
+    icon="↗"
+    color="green"
+    subtitle="Visitors inside premises"
+  />
+
+  <StatsCard
+    title="Exited Visitors"
+    value={exitedVisitors}
+    icon="↙"
+    color="orange"
+    subtitle="Exit recorded"
+  />
+
+  <StatsCard
+    title="Total Records"
+    value={visitors.length}
+    icon="▤"
+    color="purple"
+    subtitle="All saved visitor records"
+  />
+</section>
+          </>
+        )}
+
+        {/* Records */}
+        <section className="records">
+          <div className="record-header">
+            <div>
+              <h2>
+                {activePage === "Dashboard"
+                  ? "Recent Gate Records"
+                  : activePage}
+              </h2>
+              <p>Visitor entry and exit details.</p>
+            </div>
+
+            <div className="record-actions">
+              <input
+                type="search"
+                placeholder="Search visitors..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+
+              <button
+                className="primary-btn"
+                onClick={() => setShowForm(true)}
+              >
+                + Add Visitor
+              </button>
+            </div>
+          </div>
+
+          <div className="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Visitor</th>
+                  <th>Phone</th>
+                  <th>Purpose</th>
+                  <th>Meeting With</th>
+                  <th>Date</th>
+                  <th>Entry</th>
+                  <th>Exit</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {pageVisitors
+                  .slice(0, activePage === "Dashboard" ? 5 : undefined)
+                  .map((visitor) => (
+                    <tr key={visitor.id}>
+                      <td>
+                        <strong>{visitor.name}</strong>
+                        <small className="table-sub">
+                          {visitor.organization || "Individual visitor"}
+                        </small>
+                      </td>
+                      <td>{visitor.phone}</td>
+                      <td>{visitor.purpose}</td>
+                      <td>{visitor.personToMeet}</td>
+                      <td>{visitor.entryDate}</td>
+                      <td>{visitor.entryTime}</td>
+                      <td>{visitor.exitTime || "—"}</td>
+                      <td>
+                        <span
+                          className={`status ${visitor.status.toLowerCase()}`}
+                        >
+                          {visitor.status}
+                        </span>
+                      </td>
+                      <td>
+                        <div className="action-buttons">
+                          {visitor.status === "Inside" && (
+                            <button
+                              className="exit-btn"
+                              onClick={() => handleExit(visitor.id)}
+                            >
+                              Exit
+                            </button>
+                          )}
+
+                          <button
+                            className="delete-btn"
+                            onClick={() => handleDelete(visitor.id)}
+                            title="Delete record"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+
+            {pageVisitors.length === 0 && (
+              <div className="empty-state">
+                <div className="empty-icon">♙</div>
+                <h3>No visitor records found</h3>
+                <p>
+                  Add a visitor or change your search to see records.
+                </p>
+                <button
+                  className="primary-btn"
+                  onClick={() => setShowForm(true)}
+                >
+                  + Register Visitor
+                </button>
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* Add Visitor Modal */}
+        {showForm && (
+          <div className="modal-overlay">
+            <div className="modal">
+              <div className="modal-header">
+                <div>
+                  <h2>Register New Visitor</h2>
+                  <p>Enter visitor information to record a new entry.</p>
+                </div>
+                <button
+                  className="close-btn"
+                  onClick={() => setShowForm(false)}
+                >
+                  ×
+                </button>
+              </div>
+
+              <form onSubmit={handleAddVisitor}>
+                <div className="form-grid">
+                  <div className="form-group">
+                    <label>Full Name *</label>
+                    <input
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      placeholder="Visitor full name"
+                      required
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Phone Number *</label>
+                    <input
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleInputChange}
+                      placeholder="Phone number"
+                      type="tel"
+                      pattern="[0-9]{10,15}"
+                      title="Enter 10 to 15 digits"
+                      required
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Organization</label>
+                    <input
+                      name="organization"
+                      value={formData.organization}
+                      onChange={handleInputChange}
+                      placeholder="Company or organization"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Purpose of Visit *</label>
+                    <input
+                      name="purpose"
+                      value={formData.purpose}
+                      onChange={handleInputChange}
+                      placeholder="Purpose of visit"
+                      required
+                    />
+                  </div>
+
+                  <div className="form-group full-width">
+                    <label>Person to Meet *</label>
+                    <input
+                      name="personToMeet"
+                      value={formData.personToMeet}
+                      onChange={handleInputChange}
+                      placeholder="Name of host/person to meet"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="modal-actions">
+                  <button
+                    type="button"
+                    className="cancel-btn"
+                    onClick={() => setShowForm(false)}
+                  >
+                    Cancel
+                  </button>
+
+                  <button type="submit" className="primary-btn">
+                    Register Entry
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+      </main>
+    </div>
+  );
 }
 
-export default App
+export default App;
