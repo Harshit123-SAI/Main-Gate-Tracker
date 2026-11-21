@@ -4,6 +4,7 @@ import Sidebar from "./components/sidebar";
 import StatsCard from "./components/StatsCard";
 import VisitorTable from "./components/VisitorTable";
 import VisitorForm from "./components/VisitorForm";
+import Header from "./components/Header";
 
 const STORAGE_KEY = "main-gate-tracker-visitors";
 
@@ -150,20 +151,7 @@ function App() {
 />
       {/* Main Content */}
       <main className="main-content">
-        <header className="topbar">
-          <div>
-            <h1>{activePage}</h1>
-            <p>Manage and monitor gate visitor activity.</p>
-          </div>
-
-          <div className="profile">
-            <div className="avatar">A</div>
-            <div>
-              <strong>Gate Administrator</strong>
-              <small>Administrator</small>
-            </div>
-          </div>
-        </header>
+      <Header activePage={activePage} />
 
         {/* Dashboard */}
         {activePage === "Dashboard" && (
