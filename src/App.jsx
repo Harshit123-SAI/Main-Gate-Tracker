@@ -7,6 +7,7 @@ import VisitorForm from "./components/VisitorForm";
 import Header from "./components/Header";
 import DashboardStats from "./components/DashboardStats";
 import VisitorSearch from "./components/VisitorSearch";
+import Toast from "./components/Toast";
 
 const STORAGE_KEY = "main-gate-tracker-visitors";
 
@@ -22,7 +23,13 @@ function App() {
 
   const [activePage, setActivePage] = useState("Dashboard");
   const [search, setSearch] = useState("");
+  const [dateFilter, setDateFilter] = useState("");
+  const [sortOrder, setSortOrder] = useState("newest");
   const [showForm, setShowForm] = useState(false);
+  const [toast, setToast] = useState({
+  message: "",
+  type: "success",
+});
 
   const [formData, setFormData] = useState({
     name: "",
@@ -35,6 +42,15 @@ function App() {
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(visitors));
   }, [visitors]);
+  useEffect(() => {
+  if (!toast.message) return;
+
+  const timer = setTimeout(() => {
+    setToast({ message: "", type: "success" });
+  }, 3000);
+
+  return () => clearTimeout(timer);
+}, [toast.message]);
 
   const today = new Date().toLocaleDateString("en-CA");
 
@@ -49,17 +65,22 @@ function App() {
   const exitedVisitors = visitors.filter(
     (visitor) => visitor.status === "Exited"
   ).length;
+const filteredVisitors = visitors.filter((visitor) => {
+  const searchText = search.toLowerCase();
 
-  const filteredVisitors = visitors.filter((visitor) => {
-    const searchText = search.toLowerCase();
+  const matchesSearch =
+    visitor.name.toLowerCase().includes(searchText) ||
+    visitor.phone.includes(searchText) ||
+    visitor.purpose.toLowerCase().includes(searchText) ||
+    visitor.personToMeet.toLowerCase().includes(searchText);
 
-    return (
-      visitor.name.toLowerCase().includes(searchText) ||
-      visitor.phone.includes(searchText) ||
-      visitor.purpose.toLowerCase().includes(searchText) ||
-      visitor.personToMeet.toLowerCase().includes(searchText)
-    );
-  });
+  const matchesDate = dateFilter
+    ? visitor.entryDate === dateFilter
+    : true;
+
+  return matchesSearch && matchesDate;
+});
+  
 
   function handleInputChange(e) {
     const { name, value } = e.target;
@@ -88,6 +109,10 @@ function App() {
     };
 
     setVisitors((prev) => [newVisitor, ...prev]);
+    setToast({
+  message: "Visitor added successfully!",
+  type: "success",
+});
 
     setFormData({
       name: "",
@@ -100,51 +125,113 @@ function App() {
     setShowForm(false);
   }
 
-  function handleExit(visitorId) {
-    const now = new Date();
+  function handleExit(id) {
+  setVisitors((prev) =>
+    prev.map((visitor) =>
+      visitor.id === id
+        ? {
+            ...visitor,
+            status: "Exited",
+            exitTime: new Date().toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+          }
+        : visitor
+    )
+  );
 
-    setVisitors((prev) =>
-      prev.map((visitor) =>
-        visitor.id === visitorId
-          ? {
-              ...visitor,
-              status: "Exited",
-              exitTime: now.toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              }),
-            }
-          : visitor
+  setToast({
+    message: "Visitor exit marked successfully!",
+    type: "success",
+  });
+}
+
+  function handleDelete(id) {
+  setVisitors((prev) => prev.filter((visitor) => visitor.id !== id));
+
+  setToast({
+    message: "Visitor record deleted successfully!",
+    type: "success",
+  });
+}
+function handleExportCSV() {
+    if (pageVisitors.length === 0) {
+      alert("No visitor records available to export.");
+      return;
+    }
+
+    const headers = [
+      "Name",
+      "Phone",
+      "Purpose",
+      "Meeting With",
+      "Organization",
+      "Date",
+      "Entry Time",
+      "Exit Time",
+      "Status",
+    ];
+
+    const rows = pageVisitors.map((visitor) => [
+      visitor.name,
+      visitor.phone,
+      visitor.purpose,
+      visitor.personToMeet,
+      visitor.organization,
+      visitor.entryDate,
+      visitor.entryTime,
+      visitor.exitTime,
+      visitor.status,
+    ]);
+
+    const csvContent = [headers, ...rows]
+      .map((row) =>
+        row
+          .map((value) => `"${String(value ?? "").replace(/"/g, '""')}"`)
+          .join(",")
       )
-    );
-  }
+      .join("\n");
 
-  function handleDelete(visitorId) {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this visitor record?"
-    );
+    const blob = new Blob([csvContent], {
+      type: "text/csv;charset=utf-8;",
+    });
 
-    if (!confirmed) return;
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
 
-    setVisitors((prev) => prev.filter((visitor) => visitor.id !== visitorId));
-  }
+    link.href = url;
+    link.download = "visitor-records.csv";
+    link.click();
 
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
   const navItems = [
     "Dashboard",
     "Visitor Records",
     "Currently Inside",
     "History",
   ];
+  const sortedVisitors = [...filteredVisitors].sort((a, b) => {
+  if (sortOrder === "newest") {
+    return new Date(`${b.entryDate} ${b.entryTime}`) -
+           new Date(`${a.entryDate} ${a.entryTime}`);
+  }
 
-  const pageVisitors =
-    activePage === "Currently Inside"
-      ? filteredVisitors.filter((visitor) => visitor.status === "Inside")
-      : activePage === "History"
-        ? filteredVisitors.filter((visitor) => visitor.status === "Exited")
-        : filteredVisitors;
+  return new Date(`${a.entryDate} ${a.entryTime}`) -
+         new Date(`${b.entryDate} ${b.entryTime}`);
+});
+
+const pageVisitors =
+  activePage === "Currently Inside"
+    ? sortedVisitors.filter((visitor) => visitor.status === "Inside")
+    : activePage === "History"
+      ? sortedVisitors.filter((visitor) => visitor.status === "Exited")
+      : sortedVisitors;
 
   return (
     <div className="app">
+      <Toast message={toast.message} type={toast.type} />
       {/* Sidebar */}
       <Sidebar
   navItems={navItems}
@@ -191,14 +278,43 @@ function App() {
             </div>
 
             <div className="record-actions">
-            <VisitorSearch search={search} setSearch={setSearch} />
-              <button
-                className="primary-btn"
-                onClick={() => setShowForm(true)}
-              >
-                + Add Visitor
-              </button>
-            </div>
+  <VisitorSearch search={search} setSearch={setSearch} />
+  <div className="sort-filter">
+  <select
+    value={sortOrder}
+    onChange={(e) => setSortOrder(e.target.value)}
+  >
+    <option value="newest">Newest First</option>
+    <option value="oldest">Oldest First</option>
+  </select>
+</div>
+<div className="date-filter">
+  <input
+    type="date"
+    value={dateFilter}
+    onChange={(e) => setDateFilter(e.target.value)}
+  />
+
+  {dateFilter && (
+    <button onClick={() => setDateFilter("")}>
+      Clear Date
+    </button>
+  )}
+</div>
+  <button
+    className="export-btn"
+    onClick={handleExportCSV}
+  >
+    ↓ Export CSV
+  </button>
+
+  <button
+    className="primary-btn"
+    onClick={() => setShowForm(true)}
+  >
+    + Add Visitor
+  </button>
+</div>
           </div>
 <VisitorTable
   pageVisitors={pageVisitors}

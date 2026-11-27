@@ -359,9 +359,10 @@ button {
 .record-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   gap: 20px;
   margin-bottom: 24px;
+  flex-wrap: wrap;
 }
 
 .record-header h2 {
@@ -379,6 +380,9 @@ button {
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-wrap: wrap;
+  flex: 1;
+  justify-content: flex-end;
 }
 
 .record-actions input {
@@ -407,6 +411,21 @@ button {
   font-weight: 600;
   white-space: nowrap;
   transition: background 0.2s;
+}
+.export-btn {
+  background: #e5f8ee;
+  color: #13864f;
+  border: 1px solid #c8ead8;
+  border-radius: 9px;
+  padding: 12px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+
+.export-btn:hover {
+  background: #d2f2e1;
 }
 
 .primary-btn:hover {
@@ -739,11 +758,13 @@ tbody tr:hover {
   .sidebar nav {
     flex-direction: row;
     flex-wrap: wrap;
+    gap: 8px;
   }
 
   .nav-item {
     width: auto;
     flex: 1 1 45%;
+    justify-content: flex-start;
   }
 
   .sidebar-bottom {
@@ -823,4 +844,109 @@ tbody tr:hover {
   .welcome-icon {
     display: none;
   }
+}
+/* Toast Notification */
+.toast-message {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  animation: toastSlideIn 0.3s ease;
+}
+
+.toast-message.success {
+  background: #e5f8ee;
+  color: #13864f;
+  border: 1px solid #c8ead8;
+}
+
+.toast-icon {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+@keyframes toastSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Mobile Toast */
+@media (max-width: 650px) {
+  .toast-message {
+    top: 15px;
+    right: 15px;
+    left: 15px;
+    font-size: 13px;
+  }
+}
+.date-filter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-self: center;
+}
+
+.date-filter input[type="date"] {
+  height: 44px;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid #e5e4e7;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #333333;
+  font-size: 14px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.date-filter input[type="date"]:focus {
+  border-color: #aa3bff;
+}
+
+.date-filter button {
+  height: 44px;
+  padding: 0 14px;
+  border: none;
+  border-radius: 8px;
+  background: #f3e8ff;
+  color: #7e22ce;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.date-filter button:hover {
+  background: #e9d5ff;
+}
+.sort-filter select {
+  height: 44px;
+  padding: 10px 12px;
+  border: 1px solid #e5e4e7;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #333333;
+  font-size: 14px;
+  cursor: pointer;
+  outline: none;
+}
+
+.sort-filter select:focus {
+  border-color: #aa3bff;
 }
