@@ -5,9 +5,9 @@ function Footer() {
       <p>
         <strong>Developed & Maintained By:</strong>
         <br />
-        Team Member 1 Name | Team Member 2 Name
+        Team Member 1 Harshit Saini| Team Member 2 Murli Rathi
         <br />
-        CSE-AIML | Section B
+        CSE-AIML | Section A
       </p>
 
       <p>Full Stack Development Team</p>
