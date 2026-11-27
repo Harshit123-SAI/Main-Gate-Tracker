@@ -4,6 +4,7 @@ function Header({ activePage, userRole, onLogout }) {
     <header className="topbar">
       <div>
         <h1>{activePage}</h1>
+        <p>ABESEC Ghaziabad</p>
         <p>Manage and monitor gate visitor activity.</p>
       </div>
 
@@ -19,10 +20,7 @@ function Header({ activePage, userRole, onLogout }) {
           <small>{userRole}</small>
         </div>
 
-        <button
-          className="logout-btn"
-          onClick={onLogout}
-        >
+        <button className="logout-btn" onClick={onLogout}>
           Logout
         </button>
       </div>

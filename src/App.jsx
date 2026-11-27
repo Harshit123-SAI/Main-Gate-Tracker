@@ -9,6 +9,7 @@ import DashboardStats from "./components/DashboardStats";
 import VisitorSearch from "./components/VisitorSearch";
 import Toast from "./components/Toast";
 import Login from "./components/Login";
+import Footer from "./components/Footer";
 
 const STORAGE_KEY = "main-gate-tracker-visitors";
 
@@ -252,6 +253,7 @@ const pageVisitors =
   setActivePage={setActivePage}
 />
       {/* Main Content */}
+      
       <main className="main-content">
     <Header
   activePage={activePage}
@@ -260,7 +262,9 @@ const pageVisitors =
     setLoggedIn(false);
     setUserRole("");
   }}
+  
 />
+
 
         {/* Dashboard */}
         {activePage === "Dashboard" && (
@@ -377,6 +381,7 @@ const pageVisitors =
     setShowForm={setShowForm}
   />
 )}
+<Footer />
       </main>
     </div>
   );

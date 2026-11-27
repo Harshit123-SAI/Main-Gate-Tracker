@@ -965,3 +965,29 @@ tbody tr:hover {
   background: #fee2e2;
   border-color: #fecaca;
 }
+
+.app-footer {
+  margin-top: 35px;
+  padding: 25px 20px;
+  text-align: center;
+  border-top: 1px solid #e5e7eb;
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.8;
+  background: #ffffff;
+}
+
+.app-footer p {
+  margin: 8px 0;
+}
+
+.app-footer strong {
+  color: #334155;
+}
+
+@media (max-width: 768px) {
+  .app-footer {
+    padding: 20px 12px;
+    font-size: 12px;
+  }
+}
