@@ -196,7 +196,7 @@ https://main-gate-tracker-plxw.onrender.com
 
 ## Author
 
-**Harshit Saini**
+**Harshit Saini**/////
 **Murli Rathi**
 
 Computer Science Engineering – Artificial Intelligence & Machine Learning
