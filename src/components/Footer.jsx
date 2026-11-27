@@ -5,7 +5,7 @@ function Footer() {
       <p>
         <strong>Developed & Maintained By:</strong>
         <br />
-        Team Member 1 Harshit Saini| Team Member 2 Murli Rathi
+      Harshit Saini | Murli Rathi
         <br />
         CSE-AIML | Section A
       </p>
