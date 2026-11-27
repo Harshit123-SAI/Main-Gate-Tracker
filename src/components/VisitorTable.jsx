@@ -1,5 +1,5 @@
 
-function VisitorTable({ pageVisitors, activePage, handleExit, handleDelete }) {
+function VisitorTable({ pageVisitors, activePage, handleExit, handleDelete, userRole }) {
   return (
     <div className="table-container">
       <table>
@@ -42,26 +42,28 @@ function VisitorTable({ pageVisitors, activePage, handleExit, handleDelete }) {
                   </span>
                 </td>
 
-                <td>
-                  <div className="action-buttons">
-                    {visitor.status === "Inside" && (
-                      <button
-                        className="exit-btn"
-                        onClick={() => handleExit(visitor.id)}
-                      >
-                        Exit
-                      </button>
-                    )}
+              <td>
+  <div className="action-buttons">
+    {userRole === "Admin" && visitor.status === "Inside" && (
+      <button
+        className="exit-btn"
+        onClick={() => handleExit(visitor.id)}
+      >
+        Exit
+      </button>
+    )}
 
-                    <button
-                      className="delete-btn"
-                      onClick={() => handleDelete(visitor.id)}
-                      title="Delete record"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </td>
+    {userRole === "Admin" && (
+      <button
+        className="delete-btn"
+        onClick={() => handleDelete(visitor.id)}
+        title="Delete record"
+      >
+        Delete
+      </button>
+    )}
+  </div>
+</td>
               </tr>
             ))}
         </tbody>

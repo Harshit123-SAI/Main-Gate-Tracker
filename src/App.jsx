@@ -8,6 +8,7 @@ import Header from "./components/Header";
 import DashboardStats from "./components/DashboardStats";
 import VisitorSearch from "./components/VisitorSearch";
 import Toast from "./components/Toast";
+import Login from "./components/Login";
 
 const STORAGE_KEY = "main-gate-tracker-visitors";
 
@@ -22,6 +23,8 @@ function App() {
   });
 
   const [activePage, setActivePage] = useState("Dashboard");
+  const [loggedIn, setLoggedIn] = useState(false);
+const [userRole, setUserRole] = useState("");
   const [search, setSearch] = useState("");
   const [dateFilter, setDateFilter] = useState("");
   const [sortOrder, setSortOrder] = useState("newest");
@@ -228,6 +231,16 @@ const pageVisitors =
     : activePage === "History"
       ? sortedVisitors.filter((visitor) => visitor.status === "Exited")
       : sortedVisitors;
+      if (!loggedIn) {
+  return (
+    <Login
+      onLogin={(role) => {
+        setUserRole(role);
+        setLoggedIn(true);
+      }}
+    />
+  );
+}
 
   return (
     <div className="app">
@@ -240,7 +253,14 @@ const pageVisitors =
 />
       {/* Main Content */}
       <main className="main-content">
-      <Header activePage={activePage} />
+    <Header
+  activePage={activePage}
+  userRole={userRole}
+  onLogout={() => {
+    setLoggedIn(false);
+    setUserRole("");
+  }}
+/>
 
         {/* Dashboard */}
         {activePage === "Dashboard" && (
@@ -301,19 +321,23 @@ const pageVisitors =
     </button>
   )}
 </div>
+  {userRole === "Admin" && (
   <button
     className="export-btn"
     onClick={handleExportCSV}
   >
     ↓ Export CSV
   </button>
+)}
 
+  {userRole === "Admin" && (
   <button
     className="primary-btn"
     onClick={() => setShowForm(true)}
   >
     + Add Visitor
   </button>
+)}
 </div>
           </div>
 <VisitorTable
@@ -321,6 +345,7 @@ const pageVisitors =
   activePage={activePage}
   handleExit={handleExit}
   handleDelete={handleDelete}
+  userRole={userRole}
 />
 
             {pageVisitors.length === 0 && (
@@ -330,12 +355,14 @@ const pageVisitors =
                 <p>
                   Add a visitor or change your search to see records.
                 </p>
-                <button
-                  className="primary-btn"
-                  onClick={() => setShowForm(true)}
-                >
-                  + Register Visitor
-                </button>
+              {userRole === "Admin" && (
+  <button
+    className="primary-btn"
+    onClick={() => setShowForm(true)}
+  >
+    + Register Visitor
+  </button>
+)}
               </div>
             )}
 

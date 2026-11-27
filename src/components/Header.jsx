@@ -1,4 +1,5 @@
-function Header({ activePage }) {
+
+function Header({ activePage, userRole, onLogout }) {
   return (
     <header className="topbar">
       <div>
@@ -7,11 +8,23 @@ function Header({ activePage }) {
       </div>
 
       <div className="profile">
-        <div className="avatar">A</div>
-        <div>
-          <strong>Gate Administrator</strong>
-          <small>Administrator</small>
+        <div className="avatar">
+          {userRole === "Admin" ? "A" : "S"}
         </div>
+
+        <div>
+          <strong>
+            {userRole === "Admin" ? "Gate Administrator" : "Student"}
+          </strong>
+          <small>{userRole}</small>
+        </div>
+
+        <button
+          className="logout-btn"
+          onClick={onLogout}
+        >
+          Logout
+        </button>
       </div>
     </header>
   );

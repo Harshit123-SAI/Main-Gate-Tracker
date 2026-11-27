@@ -950,3 +950,18 @@ tbody tr:hover {
 .sort-filter select:focus {
   border-color: #aa3bff;
 }
+.logout-btn {
+  padding: 9px 15px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: white;
+  color: #dc2626;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.logout-btn:hover {
+  background: #fee2e2;
+  border-color: #fecaca;
+}
